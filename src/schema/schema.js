@@ -4,13 +4,14 @@ const schema = gql`
 # Root Types
 type Query {
     # Root Fields
+    "Retorna um array de usuarios"
     users: [User!]!
     user(id: ID, name: String): User
     feed(last: Int): [Post!]!
   }
   
   type Mutation {
-    createPost(content: String, userId: ID): Post!
+    createPost(content: String, userId: ID!): Post!
   }
   
   type Subscription {
@@ -22,6 +23,8 @@ type Query {
     id: ID!
     name: String!
     posts: [Post]
+    followers: [User]
+    following: [User]
   }
   type Post {
     id: ID
