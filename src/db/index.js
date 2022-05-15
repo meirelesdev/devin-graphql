@@ -2,8 +2,14 @@ const users = [
     {
         id: 1,
         name: "Daniel",
+        followers: [2],
+        posts: [1,2,4],
+    },
+    {
+        id: 2,
+        name: "Gisele",
         followers: [],
-        posts: [],
+        posts: [3],
     }
 ]
 const posts = [
@@ -14,7 +20,7 @@ const posts = [
         body: "Conteudo legal do primeiro post",
         author: 1,
         likes: 0,
-        createdAt: new Date()
+        createdAt: new Date("2020-01-01")
     },
     {
         id: 2,
@@ -23,7 +29,7 @@ const posts = [
         body: "Conteudo legal do segundo post",
         author: 1,
         likes: 20,
-        createdAt: new Date()
+        createdAt: new Date("2019-01-01")
     },
     {
         id: 3,
@@ -32,7 +38,16 @@ const posts = [
         body: "Conteudo legal do terceiro post",
         author: 1,
         likes: 15,
-        createdAt: new Date()
+        createdAt: new Date("2022-01-01")
+    },
+    {
+        id: 4,
+        title: "Meu quarto post",
+        description: "Descrição legal do quarto post",
+        body: "Conteudo legal do quarto post",
+        author: 1,
+        likes: 5,
+        createdAt: new Date("2021-01-01")
     }
 ]
 

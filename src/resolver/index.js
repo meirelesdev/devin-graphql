@@ -5,18 +5,27 @@ const getPosts = (_, { search, order }) => {
   if (search) {
     result = posts.filter((post) =>
       post.title.toLocaleLowerCase().includes(search.toLocaleLowerCase()) || 
-      post.body.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+      post.description.toLocaleLowerCase().includes(search.toLocaleLowerCase()) ||
+      post.body.toLocaleLowerCase().includes(search.toLocaleLowerCase()) 
     );
+  } else {
+      result = posts
   }
   if(order) {
       if(order === "data") {
           result = result.sort((a, b) => {
-              return a.createAd < b.createAd
+            if(a.createdAt > b.createdAt) {
+                return -1
+            }
+            return 1
           })
       }
       if(order === "likes") {
         result = result.sort((a, b) => {
-            return a.likes > b.likes
+            if(a.likes > b.likes) {
+                return -1
+            }
+            return 1
         })
     }
   }
@@ -32,6 +41,10 @@ const resolvers = {
   },
   Post: {
       author: (parent) => users.find(user => user.id === Number(parent.author))
+  },
+  User: {
+    posts: (parent) => posts.filter(post => parent.posts.includes(post.id)),
+    followers: (parent) => users.filter(follower => parent.followers.includes(follower.id))
   }
 };
 
