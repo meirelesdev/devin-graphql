@@ -20,7 +20,6 @@ const getPosts = (_, { search, order }) => {
         })
     }
   }
-
   return result;
 };
 
