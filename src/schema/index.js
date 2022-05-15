@@ -3,9 +3,9 @@ const { gql } = require("apollo-server");
 const schema = gql`
   type Query {
     "O campo \'search\' é um texto livre para busca, o campo 'order' pode receber somente duas opções: \'data\' ou \'likes\'"
-    posts( search: String, order: String ): [Post!],
-    post(id: ID): Post!
-    users: [User!],
+    posts( search: String, order: String ): [Post]!,
+    post(id: ID): Post
+    users: [User]!,
     user(id: ID): User!
   }
 
