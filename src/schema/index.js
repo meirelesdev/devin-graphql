@@ -19,7 +19,7 @@ const schema = gql`
       createUser(name: String): User!
       updateUser(id: ID, title: String, description: String, body: String, authorId: ID): User!
       followUser(id: ID, followerId: ID): User!
-      removeUser(id: ID): Post!
+      removeUser(id: ID): User!
   }
   
   type Post {

@@ -41,6 +41,13 @@ const likeOrDesLikePost = (id, like) =>{
   posts[index].likes--
     return posts[index]
 }
+const addFollower = (id, follower) => {
+  const index = users.findIndex(user => user.id === Number(id))
+  if(index > -1) {
+    users[index].followers.push(Number(follower))
+  }
+  return users[index]
+}
 const resolvers = {
   Query: {
     posts: getPosts,
@@ -87,17 +94,33 @@ const resolvers = {
     removeLikePost:(_, { id }) => {
       return likeOrDesLikePost(id, false)
     },
-    createUser:(name) => {
-      
+    createUser:(_, { name }) => {
+      const user = {
+        id: users.length + 1,
+        name,
+        followers: [],
+        posts: []
+      }
+      users.push(user)
+      return users
     },
-    updateUser:(id, title, description, body, authorId) => {
-      
+    updateUser:(_, { id, name }) => {
+        const index = users.findIndex(user => user.id === Number(id))
+        if(index > -1 ){
+          users[index].name = name || users[index].name
+        }
+        return users[index]
     },
-    followUser:(id, followerId) => {
-      
+    followUser:(_, {id, followerId }) => {
+      return addFollower(id, followerId)      
     },
-    removeUser:(id) => {
-      
+    removeUser:(_, { id }) => {
+      const index = users.findIndex(user => user.id === Number(id))
+      if (index > -1 ) {
+        const userDeleted = users[index]
+        users.slice(index, 1)
+        return userDeleted
+      }      
     },
   },
   Post: {
