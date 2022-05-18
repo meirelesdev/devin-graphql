@@ -10,8 +10,8 @@ const schema = gql`
   }
 
   type Mutation {
-      createPost(title: String, description: String, body: String, authorId: ID): Post!
-      updatePost(id: ID, title: String, description: String, body: String, authorId: ID): Post!
+      createPost(data: PostInput): Post
+      updatePost(data: PostInput, id: ID): Post!
       removePost(id: ID): Post!
       addLikePost(id: ID): Post!
       removeLikePost(id: ID): Post!
@@ -21,7 +21,12 @@ const schema = gql`
       followUser(id: ID, followerId: ID): User!
       removeUser(id: ID): User!
   }
-  
+  input PostInput {
+      title: String
+      description: String
+      body: String
+      author: Int
+  }
   type Post {
       id: ID
       title: String

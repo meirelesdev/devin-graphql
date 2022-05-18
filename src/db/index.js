@@ -1,10 +1,5 @@
 const users = [
-    {
-        id: 1,
-        name: "Daniel",
-        followers: [2],
-        posts: [1,2,4],
-    },
+    ,
     {
         id: 2,
         name: "Gisele",

@@ -1,4 +1,3 @@
-const { users, posts } = require("../db");
 
 const getPosts = (_, { search, order }) => {
   let result = [];
@@ -48,12 +47,14 @@ const addFollower = (id, follower) => {
   }
   return users[index]
 }
+
+
 const resolvers = {
   Query: {
     posts: getPosts,
     post: (_, { id }) => posts.find((post) => post.id === Number(id)),
-    users: () => users,
-    user: (_, { id }) => users.find((user) => user.id === Number(id)),
+    users: (_, __, { dataSources: { users } }) => users.findAll(),
+    user: (_, __, { dataSources: { users } }) => users.find((user) => user.id === Number(id)),
   },
   Mutation: {
     createPost: (_, {title, description, body, authorId}) => {
