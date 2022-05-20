@@ -4,25 +4,28 @@ const mongoose = require("mongoose")
 const { ApolloServer } = require('apollo-server')
 const schema = require('./schema')
 const resolvers = require('./resolver')
-const Users = require("./dataSoures/users")
-const Posts = require("./dataSoures/posts")
+const Users = require("./dataSources/users")
+const Posts = require("./dataSources/posts")
 const userSchema = require("./mongooseSchema/userSchema")
 const postSchema = require("./mongooseSchema/postSchema")
 
 const db = {
     host: process.env.DB_HOST,
-    name: process.env.DB_NAME
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    pass: process.env.DB_PASS,
 }
-mongoose
-.connect(`mongodb://${db.host}/${db.name}?retryWrites=true&w=majority`)
-.then(() => console.log("Database is connected"))
-.catch((err)=> console.log("Database failed:", err))
+const dsn = `mongodb://${db.user}:${db.pass}@${db.host}:${db.port}/?authMechanism=DEFAULT`
+mongoose.connect(dsn)
+        .then(() => console.log("Database is connected"))
+        .catch((err)=> console.log("Database failed:", err))
 
 const server = new ApolloServer({
     typeDefs: schema,
-    resolvers,
+    // resolvers: resolvers.resolverStatic,
+    resolvers: resolvers.resolverMongoose,
     context: ({req}) => {
-
+      return req  
     },
     dataSources: () => {
         return { 
