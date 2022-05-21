@@ -9,7 +9,7 @@ const resolverMongoose = {
     user: (_, { id }, { dataSources: { users } }) => users.getById(id),
   },
   Mutation: {
-    createPost: async (_, { postData }, { dataSources: { posts, users }, userId }) => {
+    createPost: async (_, { postData }, { dataSources: { posts, users }, userId, pubsub }) => {
       if(!userId) throw new Error("Usuario não autorizado.")
       const user = await users.getById(postData.authorId);
       if (!user) throw new Error("Author not found.");
@@ -20,7 +20,15 @@ const resolverMongoose = {
         author: user._id,
         likes: 0,
       };
-      return posts.create(post);
+      try {
+        const newPost = await posts.create(post)
+        pubsub.publish("POST_CREATED", {
+          newPost
+        })
+        return newPost
+      } catch(err) {
+        throw new Error("Erro ao crair o post.")
+      }
     },
     updatePost: async (
       _,
@@ -103,6 +111,16 @@ const resolverMongoose = {
         token,
       };
     }
+  },
+  Subscription: {
+    newPost: {
+      subscribe: (parent, args, { pubsub, userId }) => {
+        if (!userId) {
+          throw new Error("Usuário não identificado");
+        }
+        return pubsub.asyncIterator(["POST_CREATED"]);
+      },
+    },
   },
   Post: {
     author: async (post, _, { dataSources: { users } }) => {

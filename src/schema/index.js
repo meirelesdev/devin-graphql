@@ -16,14 +16,20 @@ const schema = gql`
     addLikePost(id: ID): Post!
     removeLikePost(id: ID): Post!
 
-    createUser(name: String, email: String, password: String): UserMutationResposen
+    createUser(
+      name: String
+      email: String
+      password: String
+    ): UserMutationResposen
     updateUser(id: ID, name: String, email: String): User!
     followUser(id: ID, followerId: ID): User!
     removeUser(id: ID): User
 
     login(email: String, password: String): UserMutationResposen!
   }
-
+  type Subscription {
+    newPost: Post
+  }
   interface MutationRespose {
     code: String!
     success: Boolean!

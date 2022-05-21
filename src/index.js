@@ -1,7 +1,7 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 
-const { ApolloServer } = require("apollo-server");
+const { ApolloServer, PubSub } = require("apollo-server");
 const schema = require("./schema");
 const resolvers = require("./resolver");
 const Users = require("./dataSources/users");
@@ -10,6 +10,7 @@ const userSchema = require("./mongooseSchema/userSchema");
 const postSchema = require("./mongooseSchema/postSchema");
 const { getUserId } = require('./utils')
 
+const pubsub = new PubSub()
 
 const db = {
   host: process.env.DB_HOST,
@@ -17,7 +18,9 @@ const db = {
   user: process.env.DB_USER,
   pass: process.env.DB_PASS,
 };
+
 const dsn = `mongodb://${db.user}:${db.pass}@${db.host}:${db.port}/?authMechanism=DEFAULT`;
+
 mongoose
   .connect(dsn)
   .then(() => console.log("Database is connected"))
@@ -27,8 +30,12 @@ const server = new ApolloServer({
   typeDefs: schema,
   // resolvers: resolvers.resolverStatic,
   resolvers: resolvers.resolverMongoose,
+  subscriptions: {
+    path: '/subscritions'
+  },
   context: (args) => {
       return {
+        pubsub,
         userId: args.req && args.req.headers.authorization ? getUserId(args.req) : null,
       };
   },
