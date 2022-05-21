@@ -1,39 +1,46 @@
-require("dotenv").config()
-const mongoose = require("mongoose")
+require("dotenv").config();
+const mongoose = require("mongoose");
 
-const { ApolloServer } = require('apollo-server')
-const schema = require('./schema')
-const resolvers = require('./resolver')
-const Users = require("./dataSources/users")
-const Posts = require("./dataSources/posts")
-const userSchema = require("./mongooseSchema/userSchema")
-const postSchema = require("./mongooseSchema/postSchema")
+const { ApolloServer } = require("apollo-server");
+const schema = require("./schema");
+const resolvers = require("./resolver");
+const Users = require("./dataSources/users");
+const Posts = require("./dataSources/posts");
+const userSchema = require("./mongooseSchema/userSchema");
+const postSchema = require("./mongooseSchema/postSchema");
+const { getUserId } = require('./utils')
+
 
 const db = {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    pass: process.env.DB_PASS,
-}
-const dsn = `mongodb://${db.user}:${db.pass}@${db.host}:${db.port}/?authMechanism=DEFAULT`
-mongoose.connect(dsn)
-        .then(() => console.log("Database is connected"))
-        .catch((err)=> console.log("Database failed:", err))
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  pass: process.env.DB_PASS,
+};
+const dsn = `mongodb://${db.user}:${db.pass}@${db.host}:${db.port}/?authMechanism=DEFAULT`;
+mongoose
+  .connect(dsn)
+  .then(() => console.log("Database is connected"))
+  .catch((err) => console.log("Database failed:", err));
 
 const server = new ApolloServer({
-    typeDefs: schema,
-    // resolvers: resolvers.resolverStatic,
-    resolvers: resolvers.resolverMongoose,
-    context: ({req}) => {
-      return req  
-    },
-    dataSources: () => {
-        return { 
-            users: new Users(userSchema),
-            posts: new Posts(postSchema)
-         }
-    }
-})
-const PORT = process.env.PORT || 3000
+  typeDefs: schema,
+  // resolvers: resolvers.resolverStatic,
+  resolvers: resolvers.resolverMongoose,
+  context: ({ req }) => {
+    const userId = req && req.headers.authorization ? getUserId(req) : null;
+    if (!userId) throw new Error("Acesso negado!.")
+      return {
+        userId,
+      };
+  },
+  dataSources: () => {
+    return {
+      users: new Users(userSchema),
+      posts: new Posts(postSchema),
+    };
+  },
+});
+const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => console.log(`Server is running on port: ${PORT}`))
+server.listen(PORT, () => console.log(`Server is running on port: ${PORT}`));
