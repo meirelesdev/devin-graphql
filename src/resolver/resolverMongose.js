@@ -9,7 +9,8 @@ const resolverMongoose = {
     user: (_, { id }, { dataSources: { users } }) => users.getById(id),
   },
   Mutation: {
-    createPost: async (_, { postData }, { dataSources: { posts, users } }) => {
+    createPost: async (_, { postData }, { dataSources: { posts, users }, userId }) => {
+      if(!userId) throw new Error("Usuario não autorizado.")
       const user = await users.getById(postData.authorId);
       if (!user) throw new Error("Author not found.");
       const post = {
@@ -24,8 +25,9 @@ const resolverMongoose = {
     updatePost: async (
       _,
       { postId, postData: { title, description, body, authorId } },
-      { dataSources: { posts, users } }
+      { dataSources: { posts, users }, userId  }
     ) => {
+      if(!userId) throw new Error("Usuario não autorizado.")
       const user = await users.getById(authorId);
       if (!user) throw new Error("Author not found.");
       const post = await posts.getById(postId);
@@ -49,7 +51,9 @@ const resolverMongoose = {
         token,
       };
     },
-    removePost: async (_, { id }, { dataSources: { posts } }) => {
+    removePost: async (_, { id }, { dataSources: { posts }, userId }) => {
+      const post = await posts.getById(id)
+      if(!userId || post.author.toString() !== userId) throw new Error("Usuario não autorizado.")
       return posts.model.deleteOne({ _id: id });
     },
     addLikePost: async (_, { id }, { dataSources: { posts } }) => {
@@ -62,9 +66,11 @@ const resolverMongoose = {
       post.likes--;
       return post.save();
     },
-    updateUser: async (_, { id, name }, { dataSources: { users } }) => {
+    updateUser: async (_, { id, name, email }, { dataSources: { users }, userId }) => {
       const user = await users.getById(id);
+      if(!userId || user._id.toString() !== userId) throw new Error("Usuario não autorizado.")
       user.name = name || user.name;
+      user.email = email || user.email;
       return user.save();
     },
     followUser: async (_, { id, followerId }, { dataSources: { users } }) => {
@@ -76,7 +82,8 @@ const resolverMongoose = {
       user.followers.push(follower._id);
       return user.save();
     },
-    removeUser: async (_, { id }, { dataSources: { users } }) => {
+    removeUser: async (_, { id }, { dataSources: { users }, userId }) => {
+      if(!userId) throw new Error("Usuario não autorizado.")
       return users.model.deleteOne({ _id: id });
     },
     login: async (_, {email, password}, {dataSources: { users }}) => {

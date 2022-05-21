@@ -27,11 +27,9 @@ const server = new ApolloServer({
   typeDefs: schema,
   // resolvers: resolvers.resolverStatic,
   resolvers: resolvers.resolverMongoose,
-  context: ({ req }) => {
-    const userId = req && req.headers.authorization ? getUserId(req) : null;
-    if (!userId) throw new Error("Acesso negado!.")
+  context: (args) => {
       return {
-        userId,
+        userId: args.req && args.req.headers.authorization ? getUserId(args.req) : null,
       };
   },
   dataSources: () => {

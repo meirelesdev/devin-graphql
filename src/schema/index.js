@@ -17,7 +17,7 @@ const schema = gql`
     removeLikePost(id: ID): Post!
 
     createUser(name: String, email: String, password: String): UserMutationResposen
-    updateUser(id: ID, name: String): User!
+    updateUser(id: ID, name: String, email: String): User!
     followUser(id: ID, followerId: ID): User!
     removeUser(id: ID): User
 
@@ -55,6 +55,7 @@ const schema = gql`
   type User {
     id: ID
     name: String
+    email: String
     followers: [User!]
     posts: [Post!]
   }

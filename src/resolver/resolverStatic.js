@@ -128,10 +128,7 @@ const resolvers = {
   },
   User: {
     posts: (parent) => {
-      console.log(posts)
-      const postsOfAuthor = posts.filter(post => parent.posts.includes(post.id))
-      console.log(postsOfAuthor)
-      return postsOfAuthor
+      return posts.filter(post => parent.posts.includes(post.id))
     },
     followers: (parent) => users.filter(follower => parent.followers.includes(follower.id))
   }
