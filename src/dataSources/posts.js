@@ -1,10 +1,10 @@
 const { MongoDataSource } = require("apollo-datasource-mongodb");
 
 class Posts extends MongoDataSource {
-  async getAllPosts() {
+  async getAll() {
     return this.model.find({});
   }
-  async getPostById(postId) {
+  async getById(postId) {
     return this.findOneById(postId)
   }
   async create(post){

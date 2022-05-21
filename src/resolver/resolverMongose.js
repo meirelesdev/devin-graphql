@@ -1,34 +1,75 @@
 const resolverMongoose = {
   Query: {
-    posts: (_, __, { dataSources: { posts } }) => posts.getAllPosts(),
-    post: (_, { id }, { dataSources: { posts } }) => posts.getPostById(id),
-    users: (_, __, { dataSources: { users }}) => users.getAllUsers(),
-    user: (_, { id }, { dataSources: { users } } ) => users.getUserById(id),
+    posts: (_, __, { dataSources: { posts } }) => posts.getAll(),
+    post: (_, { id }, { dataSources: { posts } }) => posts.getById(id),
+    users: (_, __, { dataSources: { users }}) => users.getAll(),
+    user: (_, { id }, { dataSources: { users } } ) => users.getById(id),
   },
   Mutation: {
     createPost: async (_, {postData}, { dataSources: { posts, users } } ) => {
-      const user = await users.getUserById(postData.authorId)
+      const user = await users.getById(postData.authorId)
       if(!user) throw new Error("Author not found.")
-      return posts.create(postData)
+      const post = {
+        title: postData.title,
+        description: postData.description,
+        body: postData.body,
+        author: user._id,
+        likes: 0
+      }
+      return posts.create(post)
     },
-    createUser: (_, {name}, {dataSources: { users}}) => users.createUser(name),
-    updatePost: () => console.log("update post"),
-    removePost: () => console.log("remover post"),
-    addLikePost: () => console.log("like post"),
-    removeLikePost: () => console.log("deslike post"),
-    updateUser: (_, { id }, {dataSources: { users}}) => console.log("Update user"),
-    followUser: (_, { id, followerId }, {dataSources: { users}}) => console.log("Add follower user"),
-    removeUser: (_, { id }, {dataSources: { users}}) => console.log("remover user"),
+    updatePost: async (_, {postId, postData: { title, description, body, authorId}}, { dataSources: { posts, users } } ) => {
+      const user = await users.getById(authorId)
+      if(!user) throw new Error("Author not found.")
+      const post = await posts.getById(postId)
+      post.author = user._id
+      post.title = title || post.title
+      post.description = description || post.description
+      post.body = body || post.body
+      return post.save()
+    },
+    createUser: async (_, {name}, { dataSources: { users } } ) => {
+      return users.create(name)
+    },
+    removePost: async (_, { id }, { dataSources: { posts } } ) => {
+      return posts.model.deleteOne({_id: id })
+    },
+    addLikePost: async (_, { id }, { dataSources: { posts } } ) => {
+      const post = await posts.getById(id)
+      post.likes++
+      return post.save()
+    },
+    removeLikePost:  async (_, { id }, { dataSources: { posts } } ) => {
+      const post = await posts.getById(id)
+      post.likes--
+      return post.save()
+    },
+    updateUser: async(_, { id, name }, {dataSources: { users}}) => {
+      const user = await users.getById(id)
+      user.name = name || user.name
+      return user.save()
+    },
+    followUser: async (_, { id, followerId }, {dataSources: { users}}) => {
+      const user = await users.getById(id)
+      if(!user) throw new Error("User not found.")
+      const follower = await users.getById(followerId)
+      if(!follower) throw new Error("Follower not found.")
+      // console.log(user)
+      user.followers.push(follower._id)
+      return user.save()
+    },
+    removeUser: async (_, { id }, {dataSources: { users}}) => {
+      return users.model.deleteOne({_id: id} )
+    },
   },
   Post: {
     author: async (post, _, { dataSources: { users } } ) => {
-     const user = await users.getUserById(post.author)
-     console.log(post)
+     return users.getById(post.author)
     },
   },
   User: {
     posts: (user, _, { dataSources: { posts } } ) => posts.getByAuthor(user.id),
-    followers: (user, _, { dataSources: { users } }) => users.getFollowers(user.id),
+    followers: async (user, _, { dataSources: { users } }) => users.getFollowers(user.followers),
   },
 };
 

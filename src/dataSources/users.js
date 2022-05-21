@@ -1,18 +1,18 @@
 const { MongoDataSource } = require("apollo-datasource-mongodb");
 
 class Users extends MongoDataSource {
-  async getUserById(userId) {
+  async getById(userId) {
     return this.model.findById(userId);
   }
 
-  async getAllUsers() {
+  async getAll() {
     return this.model.find()
   }
-  async createUser(name) {
+  async create(name) {
     return this.model.create({name})
   }
-  async getFollowers(userId) {
-    return this.findByFields({followers: userId})
+  async getFollowers(followersArr) {
+    return this.model.find( { _id : { $in : followersArr } } );
   }
 }
 module.exports = Users;
